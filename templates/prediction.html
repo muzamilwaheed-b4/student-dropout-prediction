@@ -147,26 +147,26 @@
         <div class="panel-title">Student Information Input</div>
         <form method="POST" action="/prediction">
           
-          <div class="section-subtitle">Academic Records (1st &amp; 2nd Semester)</div>
+          <div class="section-subtitle">Academic Records (HEC / Semester System)</div>
           <div class="row g-2 mb-2">
             <div class="col-6">
-              <label class="form-label">1st Sem Approved Courses</label>
-              <input type="number" name="cu1_approved" class="form-control" min="0" max="10" value="5" required>
+              <label class="form-label">1st Sem Cleared Courses (Out of 5-6)</label>
+              <input type="number" name="cu1_approved" class="form-control" min="0" max="8" value="5" required>
             </div>
             <div class="col-6">
-              <label class="form-label">1st Sem GPA (0.0 - 4.0)</label>
-              <input type="number" name="cu1_grade" class="form-control" min="0" max="4.0" step="0.01" value="2.8" required>
+              <label class="form-label">1st Sem SGPA (0.00 - 4.00)</label>
+              <input type="number" name="cu1_grade" class="form-control" min="0" max="4.0" step="0.01" value="2.80" required>
             </div>
             <div class="col-6">
-              <label class="form-label">2nd Sem Approved Courses</label>
-              <input type="number" name="cu2_approved" class="form-control" min="0" max="10" value="5" required>
+              <label class="form-label">2nd Sem Cleared Courses (Out of 5-6)</label>
+              <input type="number" name="cu2_approved" class="form-control" min="0" max="8" value="5" required>
             </div>
             <div class="col-6">
-              <label class="form-label">2nd Sem GPA (0.0 - 4.0)</label>
-              <input type="number" name="cu2_grade" class="form-control" min="0" max="4.0" step="0.01" value="2.8" required>
+              <label class="form-label">2nd Sem SGPA (0.00 - 4.00)</label>
+              <input type="number" name="cu2_grade" class="form-control" min="0" max="4.0" step="0.01" value="2.80" required>
             </div>
             <div class="col-12">
-              <label class="form-label">Entry Test / Intermediate Percentage (0 - 100%)</label>
+              <label class="form-label">Intermediate / Entry Test Merit Percentage (0 - 100%)</label>
               <input type="number" name="admission_grade" class="form-control" min="0" max="100" step="0.1" value="65.0" required>
             </div>
           </div>
@@ -174,24 +174,24 @@
           <div class="section-subtitle">Enrollment &amp; Financial Background</div>
           <div class="row g-2 mb-3">
             <div class="col-6">
-              <label class="form-label">Tuition Fees Paid</label>
+              <label class="form-label">Semester Fee Status</label>
               <select name="tuition_fees" class="form-select">
-                <option value="1">Up to date (Yes)</option>
-                <option value="0">Pending dues (No)</option>
+                <option value="1">Paid / Up-to-date</option>
+                <option value="0">Unpaid / Defaulter</option>
               </select>
             </div>
             <div class="col-6">
-              <label class="form-label">Scholarship Status</label>
+              <label class="form-label">HEC / Need-based Scholarship</label>
               <select name="scholarship" class="form-select">
-                <option value="0">No</option>
-                <option value="1">Yes</option>
+                <option value="0">No (Self Finance)</option>
+                <option value="1">Yes (Scholarship Holder)</option>
               </select>
             </div>
             <div class="col-6">
-              <label class="form-label">Debtor Status</label>
+              <label class="form-label">Outstanding University Dues</label>
               <select name="debtor" class="form-select">
-                <option value="0">No outstanding debt</option>
-                <option value="1">Debtor (Has unpaid balance)</option>
+                <option value="0">Clear (No Dues)</option>
+                <option value="1">Pending Arrears / Dues</option>
               </select>
             </div>
             <div class="col-6">
@@ -202,8 +202,8 @@
               </select>
             </div>
             <div class="col-6">
-              <label class="form-label">Age at Enrollment</label>
-              <input type="number" name="age" class="form-control" min="16" max="70" value="20" required>
+              <label class="form-label">Age at Admission</label>
+              <input type="number" name="age" class="form-control" min="16" max="40" value="19" required>
             </div>
           </div>
 
@@ -268,7 +268,7 @@
 
         {% else %}
         <div class="text-center py-5 text-muted small">
-          Please fill out the form fields on the left and submit to view the predicted outcome, probability estimates, and academic advising recommendations.
+          Please fill out the student academic and fee records on the left and submit to view the retention status, risk probability, and HEC-aligned advising recommendations.
         </div>
         {% endif %}
       </div>

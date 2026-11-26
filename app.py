@@ -58,26 +58,25 @@ def get_suggestions(pred_label, proba, row_dict):
     """Return academic advising notes based on model output."""
     suggestions = []
     if pred_label == 0:  # Dropout
-        suggestions.append("Schedule an advising session with the academic department.")
+        suggestions.append("Immediate intervention required: Student is falling below the HEC minimum 2.0 CGPA retention criteria.")
         if row_dict.get("Tuition fees up to date", 1) == 0:
-            suggestions.append("Check with the finance office regarding outstanding tuition dues.")
+            suggestions.append("Financial issue: Coordinate with university Accounts / Financial Aid office for semester fee installments.")
         if row_dict.get("Scholarship holder", 0) == 0:
-            suggestions.append("Review eligibility criteria for institutional financial assistance.")
+            suggestions.append("Guide the student to apply for HEC Ehsaas / Need-Based scholarship opportunities.")
         if row_dict.get("Curricular units 2nd sem (approved)", 5) < 4:
-            suggestions.append("Low credit completion observed; consider peer tutoring or reduced course load.")
+            suggestions.append("Academic warning: Student failed multiple courses. Recommend course repeats and remedial tutorial classes.")
         if row_dict.get("Debtor", 0) == 1:
-            suggestions.append("Discuss an installment payment arrangement with student accounts.")
-        suggestions.append("Utilize university learning support and counseling services.")
+            suggestions.append("Account hold active: Assist student in resolving pending library / semester fee dues.")
+        suggestions.append("Schedule one-on-one counseling with the Departmental Student Advisor.")
     elif pred_label == 1:  # Enrolled
-        suggestions.append("Academic progress is steady, but consistent semester performance is needed.")
+        suggestions.append("Academic performance is marginal (SGPA hovering between 2.0 - 2.5). Consistent effort required to avoid probation.")
         if row_dict.get("Curricular units 2nd sem (grade)", 10) < 10:
-            suggestions.append("Focus on core subject coursework to raise the cumulative GPA.")
-        suggestions.append("Attend faculty office hours for guidance on difficult subject modules.")
-        suggestions.append("Maintain attendance records to prevent missing internal assessments.")
+            suggestions.append("Target core prerequisite courses in summer semester to improve cumulative GPA.")
+        suggestions.append("Encourage regular attendance and participation in continuous assessment quizzes/assignments.")
     else:  # Graduate
-        suggestions.append("Academic performance is strong and on track for timely degree completion.")
-        suggestions.append("Explore final-year capstone topics, internship opportunities, or career placement.")
-        suggestions.append("Maintain current study routines and semester grade point average.")
+        suggestions.append("Excellent academic trajectory: SGPA is safely above graduation requirements (3.0+).")
+        suggestions.append("Eligible for Departmental Merit Scholarships and Dean's Honor Roll.")
+        suggestions.append("Encourage participation in Final Year Projects (FYP), research internships, and placement drives.")
     return suggestions
 
 
