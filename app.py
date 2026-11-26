@@ -114,6 +114,14 @@ def prediction():
                     converted_val = dtype(val)
                     # Convert Pakistan 4.0 GPA scale to European 0-20 scale internally for model compatibility
                     if form_key in ["cu1_grade", "cu2_grade"]:
+                        # Cap GPA according to cleared courses logic (if passed fewer courses, cap at realistic max)
+                        cleared_key = "cu1_approved" if form_key == "cu1_grade" else "cu2_approved"
+                        cleared_val = int(request.form.get(cleared_key, 5))
+                        max_realistic_gpa = 4.0 if cleared_val >= 6 else ((cleared_val * 4.0) / 6.0)
+                        if cleared_val == 0:
+                            converted_val = 0.0
+                        else:
+                            converted_val = min(converted_val, max_realistic_gpa)
                         converted_val = (converted_val / 4.0) * 20.0
                     # Convert Intermediate / Entry Test percentage (0-100%) to 0-200 scale internally
                     elif form_key == "admission_grade":
