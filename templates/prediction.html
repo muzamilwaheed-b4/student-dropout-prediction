@@ -151,25 +151,25 @@
           <div class="row g-2 mb-2">
             <div class="col-6">
               <label class="form-label">1st Sem Cleared Courses (Out of 6)</label>
-              <input type="number" id="cu1_approved" name="cu1_approved" class="form-control" min="0" max="6" value="5" required>
+              <input type="number" id="cu1_approved" name="cu1_approved" class="form-control" min="0" max="6" step="1" value="{{ form_data.cu1_approved if form_data else '5' }}" required>
             </div>
             <div class="col-6">
               <label class="form-label">1st Sem SGPA (0.00 - 4.00)</label>
-              <input type="number" id="cu1_grade" name="cu1_grade" class="form-control" min="0" max="4.0" step="0.01" value="2.80" required>
+              <input type="number" id="cu1_grade" name="cu1_grade" class="form-control" min="0" max="4.0" step="0.01" value="{{ form_data.cu1_grade if form_data else '2.80' }}" required>
               <div id="cu1_warning" class="text-danger small mt-1" style="display:none; font-size:0.75rem;"></div>
             </div>
             <div class="col-6">
               <label class="form-label">2nd Sem Cleared Courses (Out of 6)</label>
-              <input type="number" id="cu2_approved" name="cu2_approved" class="form-control" min="0" max="6" value="5" required>
+              <input type="number" id="cu2_approved" name="cu2_approved" class="form-control" min="0" max="6" step="1" value="{{ form_data.cu2_approved if form_data else '5' }}" required>
             </div>
             <div class="col-6">
               <label class="form-label">2nd Sem SGPA (0.00 - 4.00)</label>
-              <input type="number" id="cu2_grade" name="cu2_grade" class="form-control" min="0" max="4.0" step="0.01" value="2.80" required>
+              <input type="number" id="cu2_grade" name="cu2_grade" class="form-control" min="0" max="4.0" step="0.01" value="{{ form_data.cu2_grade if form_data else '2.80' }}" required>
               <div id="cu2_warning" class="text-danger small mt-1" style="display:none; font-size:0.75rem;"></div>
             </div>
             <div class="col-12">
               <label class="form-label">Intermediate / Entry Test Merit Percentage (0 - 100%)</label>
-              <input type="number" name="admission_grade" class="form-control" min="0" max="100" step="0.1" value="65.0" required>
+              <input type="number" name="admission_grade" class="form-control" min="0" max="100" step="0.1" value="{{ form_data.admission_grade if form_data else '65.0' }}" required>
             </div>
           </div>
 
@@ -178,34 +178,34 @@
             <div class="col-6">
               <label class="form-label">Semester Fee Status</label>
               <select name="tuition_fees" class="form-select">
-                <option value="1">Paid / Up-to-date</option>
-                <option value="0">Unpaid / Defaulter</option>
+                <option value="1" {% if form_data and form_data.tuition_fees == '1' %}selected{% endif %}>Paid / Up-to-date</option>
+                <option value="0" {% if form_data and form_data.tuition_fees == '0' %}selected{% endif %}>Unpaid / Defaulter</option>
               </select>
             </div>
             <div class="col-6">
               <label class="form-label">HEC / Need-based Scholarship</label>
               <select name="scholarship" class="form-select">
-                <option value="0">No (Self Finance)</option>
-                <option value="1">Yes (Scholarship Holder)</option>
+                <option value="0" {% if form_data and form_data.scholarship == '0' %}selected{% endif %}>No (Self Finance)</option>
+                <option value="1" {% if form_data and form_data.scholarship == '1' %}selected{% endif %}>Yes (Scholarship Holder)</option>
               </select>
             </div>
             <div class="col-6">
               <label class="form-label">Outstanding University Dues</label>
               <select name="debtor" class="form-select">
-                <option value="0">Clear (No Dues)</option>
-                <option value="1">Pending Arrears / Dues</option>
+                <option value="0" {% if form_data and form_data.debtor == '0' %}selected{% endif %}>Clear (No Dues)</option>
+                <option value="1" {% if form_data and form_data.debtor == '1' %}selected{% endif %}>Pending Arrears / Dues</option>
               </select>
             </div>
             <div class="col-6">
               <label class="form-label">Gender</label>
               <select name="gender" class="form-select">
-                <option value="0">Female</option>
-                <option value="1">Male</option>
+                <option value="0" {% if form_data and form_data.gender == '0' %}selected{% endif %}>Female</option>
+                <option value="1" {% if form_data and form_data.gender == '1' %}selected{% endif %}>Male</option>
               </select>
             </div>
             <div class="col-6">
-              <label class="form-label">Age at Admission</label>
-              <input type="number" name="age" class="form-control" min="16" max="40" value="19" required>
+              <label class="form-label">Age at Admission (17 - 30)</label>
+              <input type="number" name="age" class="form-control" min="17" max="30" value="{{ form_data.age if form_data else '19' }}" required>
             </div>
           </div>
 
@@ -299,33 +299,85 @@
     const warning = document.getElementById(warningId);
 
     function check() {
-      const cleared = parseInt(clearedInput.value) || 0;
-      const gpa = parseFloat(gpaInput.value) || 0.0;
-      
-      // If 6 courses total: Max possible GPA is (cleared * 4.0) / 6
-      // For 1 cleared course: max possible GPA is ~0.67
-      // For 2 cleared courses: max possible GPA is ~1.33
-      // For 3 cleared courses: max possible GPA is ~2.00
-      let maxPossible = 0.0;
-      if (cleared === 0) {
-        maxPossible = 0.0;
-      } else {
-        maxPossible = Math.min(4.0, ((cleared * 4.0) / 6.0));
+      // Force courses to integer (no decimals like 2.5)
+      let cleared = parseInt(clearedInput.value);
+      if (isNaN(cleared) || cleared < 0) cleared = 0;
+      if (cleared > 6) cleared = 6;
+
+      const gpa = parseFloat(gpaInput.value);
+      const totalCourses = 6;
+
+      // Handle empty or invalid GPA input
+      if (isNaN(gpa)) {
+        warning.style.display = 'none';
+        gpaInput.classList.remove('is-invalid');
+        return;
       }
 
-      if (gpa > (maxPossible + 0.1)) {
+      let messages = [];
+
+      // Basic range check
+      if (gpa < 0) {
+        messages.push('SGPA cannot be negative.');
+      } else if (gpa > 4.0) {
+        messages.push('SGPA cannot exceed 4.00 on the standard 4.00 grading scale.');
+      }
+
+      // --- CASE 1: 0 courses cleared ---
+      if (cleared === 0) {
+        if (gpa > 0.0) {
+          messages.push('SGPA must be 0.00 when 0 courses are cleared.');
+        }
+      }
+      // --- CASE 2: Some or all courses cleared ---
+      else if (gpa >= 0) {
+        // Maximum possible GPA: all cleared courses get A (4.0), failed ones contribute 0
+        const maxPossible = Math.min(4.0, (cleared * 4.0) / totalCourses);
+
+        // Minimum possible GPA: all cleared courses get D (1.0), failed ones contribute 0
+        const minPossible = (cleared * 1.0) / totalCourses;
+
+        // Check maximum violation
+        if (gpa > (maxPossible + 0.01)) {
+          messages.push(`Maximum achievable SGPA with ${cleared} cleared course(s) out of ${totalCourses} is <strong>${maxPossible.toFixed(2)}</strong> (all A grades).`);
+        }
+
+        // Check minimum violation
+        if (gpa < (minPossible - 0.01)) {
+          messages.push(`Minimum possible SGPA with ${cleared} passed course(s) out of ${totalCourses} is <strong>${minPossible.toFixed(2)}</strong> (minimum passing D grade = 1.0).`);
+        }
+      }
+
+      // Display warnings
+      if (messages.length > 0) {
         warning.style.display = 'block';
-        warning.innerHTML = `Mathematical contradiction: With only ${cleared} cleared course(s) out of 6, maximum achievable SGPA is <strong>${maxPossible.toFixed(2)}</strong>.`;
+        warning.innerHTML = messages.join('<br>');
         gpaInput.classList.add('is-invalid');
       } else {
         warning.style.display = 'none';
+        warning.innerHTML = '';
         gpaInput.classList.remove('is-invalid');
       }
     }
 
+    // Listen on BOTH input and change events (arrows/scroll use change)
     clearedInput.addEventListener('input', check);
+    clearedInput.addEventListener('change', check);
     gpaInput.addEventListener('input', check);
+    gpaInput.addEventListener('change', check);
+    // Run validation on page load too
+    check();
   }
+
+  // Block form submission if any field is invalid
+  document.querySelector('form').addEventListener('submit', function(e) {
+    const invalidFields = this.querySelectorAll('.is-invalid');
+    if (invalidFields.length > 0) {
+      e.preventDefault();
+      alert('Please fix the highlighted errors before submitting.');
+      invalidFields[0].focus();
+    }
+  });
 
   validateGPA('cu1_approved', 'cu1_grade', 'cu1_warning');
   validateGPA('cu2_approved', 'cu2_grade', 'cu2_warning');

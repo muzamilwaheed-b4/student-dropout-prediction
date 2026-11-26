@@ -17,7 +17,7 @@ from flask import Flask, render_template, request, jsonify
 
 app = Flask(__name__)
 
-# ── Load saved model bundle ──────────────────
+# Load saved model bundle
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 BUNDLE_PATH = os.path.join(BASE_DIR, "model", "model_bundle.pkl")
 
@@ -114,18 +114,33 @@ def prediction():
                     converted_val = dtype(val)
                     # Convert Pakistan 4.0 GPA scale to European 0-20 scale internally for model compatibility
                     if form_key in ["cu1_grade", "cu2_grade"]:
-                        # Cap GPA according to cleared courses logic (if passed fewer courses, cap at realistic max)
+                        total_courses = 6
                         cleared_key = "cu1_approved" if form_key == "cu1_grade" else "cu2_approved"
                         cleared_val = int(request.form.get(cleared_key, 5))
-                        max_realistic_gpa = 4.0 if cleared_val >= 6 else ((cleared_val * 4.0) / 6.0)
+
                         if cleared_val == 0:
+                            # 0 courses cleared = GPA must be 0
                             converted_val = 0.0
                         else:
-                            converted_val = min(converted_val, max_realistic_gpa)
+                            # Maximum: all cleared courses get A (4.0), failed get 0
+                            max_realistic_gpa = min(4.0, (cleared_val * 4.0) / total_courses)
+                            # Minimum: all cleared courses get D (1.0), failed get 0
+                            min_realistic_gpa = (cleared_val * 1.0) / total_courses
+
+                            # Clamp to realistic range
+                            if converted_val > max_realistic_gpa:
+                                converted_val = max_realistic_gpa
+                            elif converted_val < min_realistic_gpa:
+                                converted_val = min_realistic_gpa
+
+                        # Scale 0-4.0 to 0-20 for model
                         converted_val = (converted_val / 4.0) * 20.0
                     # Convert Intermediate / Entry Test percentage (0-100%) to 0-200 scale internally
                     elif form_key == "admission_grade":
+                        converted_val = max(0.0, min(100.0, converted_val))
                         converted_val = (converted_val / 100.0) * 200.0
+                    elif form_key == "age":
+                        converted_val = max(17, min(30, converted_val))
                     row[feature] = converted_val
 
             # Build input DataFrame with exact feature names to maintain pipeline compatibility
@@ -165,12 +180,14 @@ def prediction():
                                    prob_data=prob_data,
                                    suggestions=suggestions,
                                    submitted=True,
+                                   form_data=request.form,
                                    row=row,
                                    features=FEATURES)
 
         except Exception as e:
             return render_template('prediction.html',
                                    error=f"Error: {str(e)}",
+                                   form_data=request.form,
                                    features=FEATURES)
 
     return render_template('prediction.html', features=FEATURES)

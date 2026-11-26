@@ -1,0 +1,197 @@
+Student Dropout and Academic Success Prediction
+Project Report
+
+
+1. Introduction
+
+Student dropout is a serious problem in higher education institutions. When students leave before completing their degree, it wastes resources and affects the reputation of the university. If we can identify students who are at risk of dropping out early, the institution can provide timely support to help them stay on track.
+
+This project uses machine learning to predict whether a university student will Drop Out, remain Enrolled, or Graduate based on their academic performance, financial status, and personal background. We trained and compared four different classification algorithms and built a web application where users can enter student data and get a prediction.
+
+
+2. Dataset
+
+We used the "Predict Students Dropout and Academic Success" dataset published by Realinho et al. (2021) on the UCI Machine Learning Repository. The dataset is also available on Kaggle.
+
+Dataset details:
+- Total records: 4,424 students
+- Total features: 36 attributes
+- Target variable: 3 classes (Dropout, Enrolled, Graduate)
+- Source institution: A Portuguese higher education institution
+
+Class distribution:
+- Graduate: 2,209 students (49.9 percent)
+- Dropout: 1,421 students (32.1 percent)
+- Enrolled: 794 students (18.0 percent)
+
+The dataset includes information about student demographics (age, gender, marital status), enrollment details (application mode, course), academic performance (grades and approved units in semesters 1 and 2), and financial indicators (tuition fees status, scholarship, debtor status).
+
+Dataset link: https://www.kaggle.com/datasets/thedevastator/higher-education-predictors-of-student-retention
+
+
+3. Data Preprocessing
+
+3.1 Missing Values and Duplicates
+We checked the dataset for missing values using df.isnull().sum() and found no missing entries. We also checked for duplicate rows using df.duplicated().sum() and removed any duplicates found.
+
+3.2 Outlier Handling
+We applied the IQR (Interquartile Range) method to detect and cap outliers in continuous grade columns such as Admission grade and Previous qualification grade. The formula used was:
+- Lower bound = Q1 - 1.5 times IQR
+- Upper bound = Q3 + 1.5 times IQR
+Values outside these bounds were clipped to the nearest boundary.
+
+3.3 Target Encoding
+The target column originally contained text labels. We encoded them as:
+- Dropout = 0
+- Enrolled = 1
+- Graduate = 2
+
+3.4 Feature Scaling
+We applied StandardScaler to normalize all numerical features. This is important for distance-based algorithms like KNN and for Logistic Regression. The scaler was fitted only on the training data to prevent data leakage.
+
+3.5 Train-Test Split
+We split the data into 80 percent training and 20 percent testing using stratified sampling to maintain the original class distribution in both sets.
+
+3.6 Feature Selection
+After initial analysis and feature importance ranking, we selected 10 key features for the final model:
+1. Curricular units 1st sem (approved)
+2. Curricular units 1st sem (grade)
+3. Curricular units 2nd sem (approved)
+4. Curricular units 2nd sem (grade)
+5. Tuition fees up to date
+6. Scholarship holder
+7. Debtor
+8. Age at enrollment
+9. Admission grade
+10. Gender
+
+
+4. Exploratory Data Analysis
+
+We created several visualizations to understand the data:
+
+Target Distribution: A count plot showing the imbalanced distribution of the three classes. Graduate is the majority class and Enrolled is the minority class.
+
+Boxplots: We plotted boxplots of 2nd semester approved units grouped by target class. Students who dropped out had significantly fewer approved units compared to graduates.
+
+Stacked Bar Chart: We analyzed tuition fees status versus student outcome. Students whose fees were not up to date had a much higher dropout rate.
+
+Correlation Heatmap: We generated a heatmap of the top correlated features with the target variable. Curricular units approved and grades in both semesters showed the strongest correlation with the outcome.
+
+K-Means Clustering: We applied K-Means clustering with k=3 on academic performance features (approved units and grades from both semesters). The clustering revealed three distinct student groups:
+- Cluster 1: High risk group with 82.3 percent dropout rate
+- Cluster 0: Medium risk group with 30.4 percent dropout rate
+- Cluster 2: Low risk group with 8.1 percent dropout rate
+
+This confirms that academic performance in the first year is a strong indicator of student retention.
+
+
+5. Model Training and Evaluation
+
+5.1 Handling Class Imbalance with SMOTE
+Since the dataset is imbalanced (Enrolled class has only 18 percent of records), we used SMOTE (Synthetic Minority Over-sampling Technique) to generate synthetic samples for the minority classes. SMOTE was applied only on the training data to avoid data leakage. After SMOTE, the training set size increased from 3,539 to 5,301 samples with equal class distribution.
+
+5.2 Models Used
+We trained and evaluated four classification algorithms:
+
+K-Nearest Neighbors (KNN): A distance-based algorithm that classifies a sample based on the majority class of its k nearest neighbors. We used k=7.
+
+Decision Tree: A tree-based algorithm that creates if-else rules to classify data. We set max_depth=8 to prevent overfitting.
+
+Random Forest: An ensemble method that trains multiple decision trees on random subsets of data and combines their predictions through majority voting. We used 200 trees.
+
+Logistic Regression: A linear classification algorithm that estimates class probabilities using a logistic function. We used one-vs-rest strategy for multi-class classification.
+
+5.3 Results
+
+Results with SMOTE:
+
+Model                  Accuracy    Macro F1
+KNN                    65.9%       62.2%
+Decision Tree          68.9%       63.6%
+Random Forest          72.2%       64.6%
+Logistic Regression    67.5%       63.9%
+
+Results without SMOTE:
+
+Model                  Accuracy    Macro F1
+KNN                    71.2%       62.5%
+Decision Tree          72.1%       64.4%
+Random Forest          73.6%       64.1%
+Logistic Regression    74.2%       60.0%
+
+5.4 Why Macro F1 instead of Accuracy
+In imbalanced datasets, accuracy can be misleading. A model that always predicts the majority class (Graduate) would still achieve around 50 percent accuracy. Macro F1 score gives equal weight to all three classes, making it a fairer metric for this problem. We selected the best model based on the highest Macro F1 score with SMOTE.
+
+5.5 Best Model Selection
+Random Forest achieved the highest Macro F1 score of 64.6 percent with SMOTE. We further validated it using 5-fold stratified cross-validation, which gave a Macro F1 of 80.2 percent with a standard deviation of 4.8 percent. This confirms that the model generalizes well to unseen data.
+
+5.6 Classification Report for Random Forest (with SMOTE)
+
+Class        Precision    Recall    F1-Score    Support
+Dropout      0.76         0.71      0.73        284
+Enrolled     0.39         0.36      0.37        159
+Graduate     0.80         0.86      0.83        442
+
+The model performs best on the Graduate class and reasonably well on Dropout. The Enrolled class is the hardest to predict due to its small size and overlap with the other two classes.
+
+5.7 Feature Importance
+The Random Forest model provides feature importance scores. The top features in order of importance were:
+1. Curricular units 2nd sem (approved) - most important
+2. Curricular units 2nd sem (grade)
+3. Admission grade
+4. Curricular units 1st sem (approved)
+5. Curricular units 1st sem (grade)
+6. Age at enrollment
+7. Tuition fees up to date
+
+This shows that academic performance in the second semester is the strongest predictor of student outcome.
+
+
+6. Web Application
+
+We built a web application using Flask (Python web framework) where users can enter student information and get a prediction. The application has four pages:
+
+Home Page: Shows a brief overview of the project, dataset summary, and target distribution chart.
+
+Prediction Form: Contains input fields for the 10 selected features. After submission, it shows the predicted outcome (Dropout, Enrolled, or Graduate), the confidence percentage, a risk category (High, Medium, or Low Risk), probability distribution across all three classes, and academic advising recommendations based on the prediction.
+
+Model Metrics Page: Displays the comparison table of all four models with and without SMOTE, confusion matrix, SMOTE impact chart, feature importance chart, and K-Means cluster visualization.
+
+Project Details Page: Contains documentation about the dataset, methodology, model configurations, and team responsibilities.
+
+The trained model is saved using joblib and loaded by the Flask application at startup. The scaler is also saved to ensure consistent feature transformation during prediction.
+
+
+7. Tools and Libraries
+
+- Python 3.14
+- pandas and numpy for data manipulation
+- scikit-learn for machine learning models and evaluation
+- imbalanced-learn for SMOTE implementation
+- matplotlib and seaborn for data visualization
+- Flask for web application development
+- Bootstrap 5 for frontend interface
+- joblib for model serialization
+
+
+8. Conclusion
+
+In this project, we successfully built a machine learning system to predict student academic outcomes. After comparing four classification algorithms, Random Forest was selected as the best model with a Macro F1 score of 64.6 percent and cross-validation score of 80.2 percent.
+
+Key findings from our analysis:
+- Second semester academic performance (approved units and grades) is the strongest predictor of student retention.
+- Students with unpaid tuition fees and no scholarship have a significantly higher dropout rate.
+- K-Means clustering identified a high-risk group with 82.3 percent dropout rate, confirming that early academic struggles are a warning sign.
+- SMOTE helped improve the model ability to detect minority classes (Enrolled), though the overall accuracy slightly decreased, the fairness across classes improved.
+
+The web application provides a practical tool for educational institutions to screen students and provide early intervention to those at risk of dropping out.
+
+
+9. References
+
+Realinho, V., Vieira Martins, M., Machado, J., and Baptista, L. (2021). Predict Students Dropout and Academic Success. UCI Machine Learning Repository.
+
+Dataset: https://archive.ics.uci.edu/dataset/697/predict+students+dropout+and+academic+success
+
+GitHub Repository: https://github.com/muzamilwaheed-b4/student-dropout-prediction

@@ -106,5 +106,26 @@ class SystemTestSuite(unittest.TestCase):
         self.assertEqual(response.status_code, 200)
         self.assertNotIn(b"Internal Server Error", response.data)
 
+    def test_07_gpa_clamping_and_form_persistence(self):
+        """Test Case: Verify GPA clamping logic and that form inputs are retained after POST."""
+        data = {
+            "cu1_approved": "1",
+            "cu1_grade": "4.0",     # Exceeds max possible for 1 course (0.67) -> will clamp internally
+            "cu2_approved": "5",
+            "cu2_grade": "0.0",     # Below min possible for 5 courses (0.83) -> will clamp internally
+            "admission_grade": "75.0",
+            "tuition_fees": "1",
+            "scholarship": "1",
+            "debtor": "0",
+            "gender": "1",
+            "age": "21"
+        }
+        response = self.client.post('/prediction', data=data)
+        self.assertEqual(response.status_code, 200)
+        self.assertNotIn(b"Error:", response.data)
+        # Form values should be retained in the rendered template
+        self.assertIn(b'value="1"', response.data)
+        self.assertIn(b'value="75.0"', response.data)
+
 if __name__ == '__main__':
     unittest.main()
