@@ -112,7 +112,14 @@ def prediction():
             for feature, (form_key, dtype, default) in field_map.items():
                 if feature in FEATURES:
                     val = request.form.get(form_key, default)
-                    row[feature] = dtype(val)
+                    converted_val = dtype(val)
+                    # Convert Pakistan 4.0 GPA scale to European 0-20 scale internally for model compatibility
+                    if form_key in ["cu1_grade", "cu2_grade"]:
+                        converted_val = (converted_val / 4.0) * 20.0
+                    # Convert Intermediate / Entry Test percentage (0-100%) to 0-200 scale internally
+                    elif form_key == "admission_grade":
+                        converted_val = (converted_val / 100.0) * 200.0
+                    row[feature] = converted_val
 
             # Build input DataFrame with exact feature names to maintain pipeline compatibility
             input_df = pd.DataFrame([row], columns=FEATURES)
