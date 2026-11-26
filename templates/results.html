@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Model Results - Student Dropout Prediction</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body {
+      background-color: #fcfcfc;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      color: #212529;
+    }
+    .top-nav {
+      border-bottom: 1px solid #e5e5e5;
+      background: #ffffff;
+      padding: 12px 0;
+      margin-bottom: 25px;
+    }
+    .top-nav a {
+      color: #495057;
+      text-decoration: none;
+      margin-left: 20px;
+      font-size: 0.95rem;
+    }
+    .top-nav a:hover, .top-nav a.active {
+      color: #000;
+      font-weight: 600;
+    }
+    .page-header {
+      margin-bottom: 25px;
+    }
+    .panel {
+      border: 1px solid #dcdcdc;
+      background: #ffffff;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+    .panel-title {
+      font-size: 1rem;
+      font-weight: 600;
+      border-bottom: 1px solid #eee;
+      padding-bottom: 8px;
+      margin-bottom: 15px;
+    }
+    .table-results {
+      font-size: 0.88rem;
+    }
+    .table-results th {
+      background-color: #f7f7f7;
+      font-weight: 600;
+    }
+    footer {
+      border-top: 1px solid #eee;
+      padding: 15px 0;
+      text-align: center;
+      font-size: 0.8rem;
+      color: #777;
+      margin-top: 40px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="top-nav">
+  <div class="container d-flex justify-content-between align-items-center">
+    <span class="fw-bold" style="font-size: 1.05rem;">Student Retention Prediction System</span>
+    <div>
+      <a href="/">Home</a>
+      <a href="/prediction">Prediction Form</a>
+      <a href="/results" class="active">Model Metrics</a>
+      <a href="/about">Project Details</a>
+    </div>
+  </div>
+</div>
+
+<div class="container">
+  <div class="page-header">
+    <h3>Model Performance &amp; Evaluation Metrics</h3>
+    <p class="text-muted small">Comparison of classifier performance with and without synthetic oversampling (SMOTE).</p>
+  </div>
+
+  {% if rows %}
+  <div class="panel">
+    <div class="panel-title">Model Comparison Table</div>
+    <div class="table-responsive">
+      <table class="table table-sm table-bordered table-results mb-2">
+        <thead>
+          <tr>
+            <th>Model</th>
+            <th>Accuracy (with SMOTE)</th>
+            <th>Macro F1 (with SMOTE)</th>
+            <th>Accuracy (Original)</th>
+            <th>Macro F1 (Original)</th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for row in rows %}
+          <tr {% if row.model == best_model %}class="table-light fw-bold"{% endif %}>
+            <td>
+              {{ row.model }}
+              {% if row.model == best_model %}
+              <span class="text-muted small ms-1">(Selected)</span>
+              {% endif %}
+            </td>
+            <td>{{ row.acc_smote }}%</td>
+            <td>{{ row.f1_smote }}%</td>
+            <td>{{ row.acc_no }}%</td>
+            <td>{{ row.f1_no }}%</td>
+          </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+    <div class="small text-muted">
+      <strong>Best Model Selected:</strong> {{ best_model }} &nbsp;|&nbsp; 
+      <strong>5-Fold CV Macro F1:</strong> {{ cv_mean }}% &plusmn; {{ cv_std }}%
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-md-6">
+      <div class="panel">
+        <div class="panel-title">Confusion Matrix ({{ best_model }})</div>
+        <div class="text-center py-1">
+          <img src="/static/plots/confusion_matrix.png" class="img-fluid" style="max-height: 290px;" alt="Confusion Matrix">
+        </div>
+      </div>
+    </div>
+    <div class="col-md-6">
+      <div class="panel">
+        <div class="panel-title">SMOTE Impact on Macro F1</div>
+        <div class="text-center py-1">
+          <img src="/static/plots/smote_comparison.png" class="img-fluid" style="max-height: 290px;" alt="SMOTE Comparison">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-md-6">
+      <div class="panel">
+        <div class="panel-title">Feature Importance Analysis</div>
+        <div class="text-center py-1">
+          <img src="/static/plots/feature_importance.png" class="img-fluid" style="max-height: 290px;" alt="Feature Importance">
+        </div>
+      </div>
+    </div>
+    <div class="col-md-6">
+      <div class="panel">
+        <div class="panel-title">K-Means Clusters (Academic Risk Profile)</div>
+        <div class="text-center py-1">
+          <img src="/static/plots/kmeans_clusters.png" class="img-fluid" style="max-height: 290px;" alt="K-Means Clusters">
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-title">Exploratory Data Analysis Plots</div>
+    <div class="row g-3">
+      <div class="col-md-6 text-center">
+        <p class="small text-muted mb-1">Approved Units vs Target</p>
+        <img src="/static/plots/approved_units_boxplot.png" class="img-fluid" style="max-height: 250px;" alt="Boxplot">
+      </div>
+      <div class="col-md-6 text-center">
+        <p class="small text-muted mb-1">Tuition Fees Status vs Target</p>
+        <img src="/static/plots/tuition_fees_outcome.png" class="img-fluid" style="max-height: 250px;" alt="Tuition Fees Plot">
+      </div>
+    </div>
+  </div>
+
+  {% else %}
+  <div class="panel text-center py-5 text-muted small">
+    Metrics are currently not loaded. Please run <code>python train.py</code> to train models and generate the evaluation plots.
+  </div>
+  {% endif %}
+</div>
+
+<footer>
+  Student Dropout Prediction System &nbsp;&bull;&nbsp; CS Lab Final Project &nbsp;&bull;&nbsp; Department of Computer Science
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

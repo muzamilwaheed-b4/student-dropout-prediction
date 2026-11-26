@@ -1,0 +1,163 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>About - Student Dropout Prediction</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body {
+      background-color: #fcfcfc;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      color: #212529;
+    }
+    .top-nav {
+      border-bottom: 1px solid #e5e5e5;
+      background: #ffffff;
+      padding: 12px 0;
+      margin-bottom: 25px;
+    }
+    .top-nav a {
+      color: #495057;
+      text-decoration: none;
+      margin-left: 20px;
+      font-size: 0.95rem;
+    }
+    .top-nav a:hover, .top-nav a.active {
+      color: #000;
+      font-weight: 600;
+    }
+    .page-header {
+      margin-bottom: 25px;
+    }
+    .panel {
+      border: 1px solid #dcdcdc;
+      background: #ffffff;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+    .panel-title {
+      font-size: 1rem;
+      font-weight: 600;
+      border-bottom: 1px solid #eee;
+      padding-bottom: 8px;
+      margin-bottom: 15px;
+    }
+    footer {
+      border-top: 1px solid #eee;
+      padding: 15px 0;
+      text-align: center;
+      font-size: 0.8rem;
+      color: #777;
+      margin-top: 40px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="top-nav">
+  <div class="container d-flex justify-content-between align-items-center">
+    <span class="fw-bold" style="font-size: 1.05rem;">Student Retention Prediction System</span>
+    <div>
+      <a href="/">Home</a>
+      <a href="/prediction">Prediction Form</a>
+      <a href="/results">Model Metrics</a>
+      <a href="/about" class="active">Project Details</a>
+    </div>
+  </div>
+</div>
+
+<div class="container">
+  <div class="page-header">
+    <h3>Project Documentation &amp; Technical Notes</h3>
+    <p class="text-muted small">Experimental design, methodology, and implementation breakdown.</p>
+  </div>
+
+  <div class="panel">
+    <div class="panel-title">1. Dataset Source &amp; Characteristics</div>
+    <p class="small text-muted mb-2">
+      This study utilizes the <em>Predict Students' Dropout and Academic Success</em> dataset published on the UCI Machine Learning Repository (Realinho et al., 2021). The records originate from a higher education institution and cover diverse undergraduate programs.
+    </p>
+    <ul class="small text-muted mb-0">
+      <li><strong>Total Instances:</strong> 4,424 observations</li>
+      <li><strong>Predictor Variables:</strong> 36 attributes covering demographic characteristics, socio-economic factors, entrance examination metrics, and academic progress across semesters 1 and 2.</li>
+      <li><strong>Target Classes:</strong> <code>Dropout</code> (32.1%), <code>Enrolled</code> (18.0%), <code>Graduate</code> (49.9%).</li>
+    </ul>
+  </div>
+
+  <div class="panel">
+    <div class="panel-title">2. Data Cleaning &amp; Feature Preprocessing</div>
+    <p class="small text-muted mb-2">
+      To maintain strict methodology and prevent data leakage:
+    </p>
+    <ul class="small text-muted mb-0">
+      <li><strong>Partitioning:</strong> An 80/20 stratified train-test split was performed prior to applying scaling and synthetic resampling.</li>
+      <li><strong>Outlier Treatment:</strong> Capping was applied to extreme continuous entrance and course grades using the standard IQR rule (Q1 - 1.5*IQR to Q3 + 1.5*IQR).</li>
+      <li><strong>Standardization:</strong> Feature scaling via <code>StandardScaler</code> was fit exclusively on training data and subsequently applied to test vectors.</li>
+      <li><strong>Class Imbalance Mitigation:</strong> <code>SMOTE</code> was executed only on the training feature matrix to balance minority class samples.</li>
+    </ul>
+  </div>
+
+  <div class="panel">
+    <div class="panel-title">3. Model Selection &amp; Hyperparameters</div>
+    <div class="table-responsive">
+      <table class="table table-sm table-bordered small mb-0">
+        <thead class="table-light">
+          <tr>
+            <th>Algorithm</th>
+            <th>Configuration</th>
+            <th>Primary Motivation</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>K-Nearest Neighbors</td>
+            <td>k=7, distance-weighted</td>
+            <td>Instance-based non-parametric baseline</td>
+          </tr>
+          <tr>
+            <td>Decision Tree</td>
+            <td>max_depth=8, criterion='gini'</td>
+            <td>Direct rule interpretability</td>
+          </tr>
+          <tr>
+            <td>Random Forest</td>
+            <td>n_estimators=200, random_state=42</td>
+            <td>Ensemble variance reduction and feature ranking</td>
+          </tr>
+          <tr>
+            <td>Logistic Regression</td>
+            <td>max_iter=1000, multi_class='ovr'</td>
+            <td>Linear classification benchmark</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-title">4. Team Project Distribution</div>
+    <div class="row small text-muted">
+      <div class="col-md-4">
+        <strong>Member 1:</strong>
+        <p class="mb-0">Data ingestion, EDA plots, IQR cleaning, and target distribution analysis.</p>
+      </div>
+      <div class="col-md-4">
+        <strong>Member 2:</strong>
+        <p class="mb-0">Algorithm benchmarking, SMOTE implementation, K-Means clustering, and evaluation.</p>
+      </div>
+      <div class="col-md-4">
+        <strong>Member 3:</strong>
+        <p class="mb-0">Flask web interface, prediction endpoint integration, and technical report writing.</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  Student Dropout Prediction System &nbsp;&bull;&nbsp; CS Lab Final Project &nbsp;&bull;&nbsp; Department of Computer Science
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

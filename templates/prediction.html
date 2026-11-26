@@ -1,0 +1,295 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Student Dropout Prediction</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body {
+      background-color: #fcfcfc;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      color: #212529;
+    }
+    .top-nav {
+      border-bottom: 1px solid #e5e5e5;
+      background: #ffffff;
+      padding: 12px 0;
+      margin-bottom: 25px;
+    }
+    .top-nav a {
+      color: #495057;
+      text-decoration: none;
+      margin-left: 20px;
+      font-size: 0.95rem;
+    }
+    .top-nav a:hover, .top-nav a.active {
+      color: #000;
+      font-weight: 600;
+    }
+    .page-header {
+      margin-bottom: 25px;
+    }
+    .page-header h3 {
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+    .panel {
+      border: 1px solid #dcdcdc;
+      background: #ffffff;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+    .panel-title {
+      font-size: 1rem;
+      font-weight: 600;
+      border-bottom: 1px solid #eee;
+      padding-bottom: 8px;
+      margin-bottom: 15px;
+    }
+    .section-subtitle {
+      font-size: 0.75rem;
+      font-weight: bold;
+      color: #666;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+      margin: 15px 0 10px 0;
+    }
+    .form-label {
+      font-size: 0.85rem;
+      color: #333;
+      margin-bottom: 3px;
+    }
+    .form-control, .form-select {
+      font-size: 0.88rem;
+      border-radius: 2px;
+      border: 1px solid #ccc;
+    }
+    .btn-submit {
+      background-color: #2b3035;
+      color: #fff;
+      border: 1px solid #2b3035;
+      border-radius: 2px;
+      font-size: 0.9rem;
+      padding: 7px 16px;
+    }
+    .btn-submit:hover {
+      background-color: #1a1e21;
+      color: #fff;
+    }
+    .table-results {
+      font-size: 0.88rem;
+    }
+    .table-results th {
+      background-color: #f7f7f7;
+      border-bottom: 1px solid #ccc;
+      font-weight: 600;
+    }
+    .progress-bar-container {
+      background-color: #e9ecef;
+      height: 12px;
+      border-radius: 2px;
+      overflow: hidden;
+      margin-top: 3px;
+    }
+    .progress-bar-fill {
+      height: 100%;
+      background-color: #495057;
+    }
+    .recommendation-list {
+      padding-left: 18px;
+      margin-bottom: 0;
+      font-size: 0.88rem;
+    }
+    .recommendation-list li {
+      margin-bottom: 6px;
+    }
+    footer {
+      border-top: 1px solid #eee;
+      padding: 15px 0;
+      text-align: center;
+      font-size: 0.8rem;
+      color: #777;
+      margin-top: 40px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="top-nav">
+  <div class="container d-flex justify-content-between align-items-center">
+    <span class="fw-bold" style="font-size: 1.05rem;">Student Retention Prediction System</span>
+    <div>
+      <a href="/">Home</a>
+      <a href="/prediction" class="active">Prediction Form</a>
+      <a href="/results">Model Metrics</a>
+      <a href="/about">Project Details</a>
+    </div>
+  </div>
+</div>
+
+<div class="container">
+  <div class="page-header">
+    <h3>Student Outcome Prediction</h3>
+    <p class="text-muted small">Enter first-year academic records and student status to evaluate retention risk.</p>
+  </div>
+
+  {% if error %}
+  <div class="alert alert-secondary py-2 small" role="alert">
+    {{ error }}
+  </div>
+  {% endif %}
+
+  <div class="row">
+    <!-- Input Form -->
+    <div class="col-md-6">
+      <div class="panel">
+        <div class="panel-title">Student Information Input</div>
+        <form method="POST" action="/prediction">
+          
+          <div class="section-subtitle">Academic Records (1st &amp; 2nd Semester)</div>
+          <div class="row g-2 mb-2">
+            <div class="col-6">
+              <label class="form-label">1st Sem Approved Units</label>
+              <input type="number" name="cu1_approved" class="form-control" min="0" max="30" value="5" required>
+            </div>
+            <div class="col-6">
+              <label class="form-label">1st Sem Grade (0-20)</label>
+              <input type="number" name="cu1_grade" class="form-control" min="0" max="20" step="0.1" value="12.0" required>
+            </div>
+            <div class="col-6">
+              <label class="form-label">2nd Sem Approved Units</label>
+              <input type="number" name="cu2_approved" class="form-control" min="0" max="30" value="5" required>
+            </div>
+            <div class="col-6">
+              <label class="form-label">2nd Sem Grade (0-20)</label>
+              <input type="number" name="cu2_grade" class="form-control" min="0" max="20" step="0.1" value="12.0" required>
+            </div>
+            <div class="col-12">
+              <label class="form-label">Admission Qualification Grade (0-200)</label>
+              <input type="number" name="admission_grade" class="form-control" min="0" max="200" step="0.1" value="125.0" required>
+            </div>
+          </div>
+
+          <div class="section-subtitle">Enrollment &amp; Financial Background</div>
+          <div class="row g-2 mb-3">
+            <div class="col-6">
+              <label class="form-label">Tuition Fees Paid</label>
+              <select name="tuition_fees" class="form-select">
+                <option value="1">Up to date (Yes)</option>
+                <option value="0">Pending dues (No)</option>
+              </select>
+            </div>
+            <div class="col-6">
+              <label class="form-label">Scholarship Status</label>
+              <select name="scholarship" class="form-select">
+                <option value="0">No</option>
+                <option value="1">Yes</option>
+              </select>
+            </div>
+            <div class="col-6">
+              <label class="form-label">Debtor Status</label>
+              <select name="debtor" class="form-select">
+                <option value="0">No outstanding debt</option>
+                <option value="1">Debtor (Has unpaid balance)</option>
+              </select>
+            </div>
+            <div class="col-6">
+              <label class="form-label">Gender</label>
+              <select name="gender" class="form-select">
+                <option value="0">Female</option>
+                <option value="1">Male</option>
+              </select>
+            </div>
+            <div class="col-6">
+              <label class="form-label">Age at Enrollment</label>
+              <input type="number" name="age" class="form-control" min="16" max="70" value="20" required>
+            </div>
+          </div>
+
+          <button type="submit" class="btn-submit w-100">Run Prediction</button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Output Section -->
+    <div class="col-md-6">
+      <div class="panel">
+        <div class="panel-title">Model Evaluation Output</div>
+
+        {% if submitted %}
+        <div class="mb-3">
+          <div class="d-flex justify-content-between align-items-baseline mb-2">
+            <span class="small text-muted">Predicted Classification:</span>
+            <span class="fs-5 fw-bold">{{ result }}</span>
+          </div>
+          <div class="d-flex justify-content-between align-items-baseline mb-2">
+            <span class="small text-muted">Model Confidence:</span>
+            <span><strong>{{ pred_pct }}%</strong></span>
+          </div>
+          <div class="d-flex justify-content-between align-items-baseline mb-3">
+            <span class="small text-muted">Attrition Risk Category:</span>
+            <span class="border px-2 py-0 small bg-light">{{ risk_badge[0] }}</span>
+          </div>
+        </div>
+
+        <div class="mb-4">
+          <div class="small fw-bold text-muted mb-2">Class Probability Distribution</div>
+          <table class="table table-sm table-results table-bordered mb-0">
+            <thead>
+              <tr>
+                <th>Outcome Class</th>
+                <th style="width: 25%;">Probability</th>
+                <th style="width: 40%;">Indicator</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for i in range(prob_data.labels|length) %}
+              <tr>
+                <td>{{ prob_data.labels[i] }}</td>
+                <td>{{ prob_data.prob_values[i] }}%</td>
+                <td class="align-middle">
+                  <div class="progress-bar-container">
+                    <div class="progress-bar-fill" style="width: {{ prob_data.prob_values[i] }}%;"></div>
+                  </div>
+                </td>
+              </tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+
+        <div class="panel-title" style="font-size: 0.9rem;">Advising Notes &amp; Action Items</div>
+        <ul class="recommendation-list">
+          {% for s in suggestions %}
+          <li>{{ s }}</li>
+          {% endfor %}
+        </ul>
+
+        {% else %}
+        <div class="text-center py-5 text-muted small">
+          Please fill out the form fields on the left and submit to view the predicted outcome, probability estimates, and academic advising recommendations.
+        </div>
+        {% endif %}
+      </div>
+
+      <div class="panel">
+        <div class="panel-title" style="font-size: 0.9rem;">Model Overview</div>
+        <p class="small text-muted mb-2">
+          Model: <strong>Random Forest Classifier</strong> trained on 10 select curricular and demographic features from the UCI Student Dropout Dataset.
+        </p>
+        <div class="small text-muted">
+          All continuous inputs are scaled using <code>StandardScaler</code> fit during training. Resampling was carried out with <code>SMOTE</code> on training observations only.
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<footer>
+  Student Dropout Prediction System &nbsp;&bull;&nbsp; CS Lab Final Project &nbsp;&bull;&nbsp; Department of Computer Science
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>

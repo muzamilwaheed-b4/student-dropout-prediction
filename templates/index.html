@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Student Dropout Prediction</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+  <style>
+    body {
+      background-color: #fcfcfc;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+      color: #212529;
+    }
+    .top-nav {
+      border-bottom: 1px solid #e5e5e5;
+      background: #ffffff;
+      padding: 12px 0;
+      margin-bottom: 25px;
+    }
+    .top-nav a {
+      color: #495057;
+      text-decoration: none;
+      margin-left: 20px;
+      font-size: 0.95rem;
+    }
+    .top-nav a:hover, .top-nav a.active {
+      color: #000;
+      font-weight: 600;
+    }
+    .page-header {
+      margin-bottom: 25px;
+    }
+    .panel {
+      border: 1px solid #dcdcdc;
+      background: #ffffff;
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+    .panel-title {
+      font-size: 1rem;
+      font-weight: 600;
+      border-bottom: 1px solid #eee;
+      padding-bottom: 8px;
+      margin-bottom: 15px;
+    }
+    .btn-action {
+      background-color: #2b3035;
+      color: #fff;
+      border: 1px solid #2b3035;
+      border-radius: 2px;
+      font-size: 0.9rem;
+      padding: 6px 14px;
+      text-decoration: none;
+      display: inline-block;
+    }
+    .btn-action:hover {
+      background-color: #1a1e21;
+      color: #fff;
+    }
+    .btn-secondary-action {
+      background-color: #fff;
+      color: #333;
+      border: 1px solid #ccc;
+      border-radius: 2px;
+      font-size: 0.9rem;
+      padding: 6px 14px;
+      text-decoration: none;
+      display: inline-block;
+      margin-left: 8px;
+    }
+    .btn-secondary-action:hover {
+      background-color: #f5f5f5;
+      color: #000;
+    }
+    footer {
+      border-top: 1px solid #eee;
+      padding: 15px 0;
+      text-align: center;
+      font-size: 0.8rem;
+      color: #777;
+      margin-top: 40px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="top-nav">
+  <div class="container d-flex justify-content-between align-items-center">
+    <span class="fw-bold" style="font-size: 1.05rem;">Student Retention Prediction System</span>
+    <div>
+      <a href="/" class="active">Home</a>
+      <a href="/prediction">Prediction Form</a>
+      <a href="/results">Model Metrics</a>
+      <a href="/about">Project Details</a>
+    </div>
+  </div>
+</div>
+
+<div class="container">
+  <div class="page-header">
+    <h3>Academic Trajectory &amp; Dropout Prediction System</h3>
+    <p class="text-muted small">
+      A machine learning project evaluating academic performance, enrollment attributes, and demographic factors to predict student retention.
+    </p>
+    <div class="mt-3">
+      <a href="/prediction" class="btn-action">Open Prediction Form</a>
+      <a href="/results" class="btn-secondary-action">View Evaluation Metrics</a>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-md-7">
+      <div class="panel">
+        <div class="panel-title">Project Summary</div>
+        <p class="small text-muted mb-2">
+          This system was implemented as part of the Machine Learning course curriculum. It evaluates four classical classifiers trained on the UCI Higher Education Retention dataset.
+        </p>
+        <ul class="small text-muted mb-0">
+          <li><strong>Algorithms Evaluated:</strong> K-Nearest Neighbors, Decision Tree, Random Forest, Logistic Regression.</li>
+          <li><strong>Data Preprocessing:</strong> Missing value verification, IQR outlier capping for entrance grades, and standard normalization.</li>
+          <li><strong>Imbalance Treatment:</strong> Synthetic Minority Over-sampling Technique (SMOTE) applied on training splits.</li>
+          <li><strong>Clustering Analysis:</strong> K-Means clustering (k=3) for risk group identification.</li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="col-md-5">
+      <div class="panel">
+        <div class="panel-title">Target Class Distribution</div>
+        <p class="small text-muted mb-3">UCI Dataset (4,424 student records)</p>
+        <table class="table table-sm table-bordered small mb-0">
+          <thead class="table-light">
+            <tr>
+              <th>Status</th>
+              <th>Records</th>
+              <th>Share</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>Graduate</td>
+              <td>2,209</td>
+              <td>49.9%</td>
+            </tr>
+            <tr>
+              <td>Dropout</td>
+              <td>1,421</td>
+              <td>32.1%</td>
+            </tr>
+            <tr>
+              <td>Enrolled</td>
+              <td>794</td>
+              <td>18.0%</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="panel">
+    <div class="panel-title">Data Exploration: Target Distribution</div>
+    <div class="text-center py-2">
+      <img src="/static/plots/target_distribution.png" class="img-fluid" style="max-height: 250px;" alt="Target distribution chart">
+    </div>
+  </div>
+</div>
+
+<footer>
+  Student Dropout Prediction System &nbsp;&bull;&nbsp; CS Lab Final Project &nbsp;&bull;&nbsp; Department of Computer Science
+</footer>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
